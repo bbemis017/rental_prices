@@ -10,7 +10,7 @@ _LAMBDA_SERVER_PORT=8001 go run Main.go
 
 call lambda function with client
 ```bash
-go run client.go
+go run client/client.go
 ```
 
 ### Manually Deploy to AWS Lambda
