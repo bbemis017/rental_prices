@@ -1,6 +1,1 @@
-# deliverable
-main.zip
-
-# binaries
-main
-client/client
+bin/**
