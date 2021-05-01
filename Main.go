@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
+	"fmt"
 )
 
 func hello() (string, error) {
-	return "Hello ƛ!", nil
+	fmt.Println("Logging the handler")
+	return "Hello ƛ! whatsuppp", nil
 }
 
 func main() {
