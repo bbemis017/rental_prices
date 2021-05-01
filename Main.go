@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/aws/aws-lambda-go/lambda"
 	"fmt"
+
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func hello() (string, error) {
