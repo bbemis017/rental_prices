@@ -2,14 +2,13 @@ package notifications
 
 import "fmt"
 
-type LogMessage struct {
-	message string
+type LogMessage struct{}
+
+func NewLogMessage() (Notifier, error) {
+	return LogMessage{}, nil
 }
 
-func NewLogMessage(message string) (Notifier, error) {
-	return LogMessage{message: message}, nil
-}
-
-func (logMessage LogMessage) Send() {
-	fmt.Println(logMessage.message)
+func (logMessage LogMessage) Send(content NotifierContent) error {
+	fmt.Println("Notifier " + content.toString())
+	return nil
 }

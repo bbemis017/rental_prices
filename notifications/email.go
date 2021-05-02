@@ -2,11 +2,11 @@ package notifications
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/bbemis017/ApartmentNotifier/util"
 )
 
 type EmailMessage struct {
@@ -16,30 +16,27 @@ type EmailMessage struct {
 }
 
 func NewEmailMessage() (Notifier, error) {
-	fmt.Println("Init Notifier")
 
 	notifier := EmailMessage{
-		toEmail: os.Getenv("TO_EMAIL"),
-		subject: os.Getenv("SUBJECT"),
+		toEmail: util.GetEnvOrFail(util.ENV_EMAIL_RECIPIENT),
+		subject: util.GetEnvOrDefault(util.ENV_EMAIL_SUBJECT, "ApartmentNotifier"),
 	}
 
-	if len(notifier.subject) < 0 {
-		notifier.subject = "Message from website"
-	}
-
-	notifier.emailClient = ses.New(session.New(), aws.NewConfig().WithRegion("us-east-1"))
+	notifier.emailClient = ses.New(
+		session.New(),
+		aws.NewConfig().WithRegion(util.GetEnvOrFail(util.ENV_AWS_REGION)),
+	)
 
 	return notifier, nil
 }
 
-func (message EmailMessage) Send() {
-	fmt.Println("Test send mail")
+func (message EmailMessage) Send(content NotifierContent) error {
 
 	emailParams := &ses.SendEmailInput{
 		Message: &ses.Message{
 			Body: &ses.Body{
 				Text: &ses.Content{
-					Data: aws.String("message text"),
+					Data: aws.String(content.toString()),
 				},
 			},
 			Subject: &ses.Content{
@@ -53,12 +50,6 @@ func (message EmailMessage) Send() {
 	}
 	fmt.Println(emailParams)
 
-	result, err := message.emailClient.SendEmail(emailParams)
-
-	fmt.Println("Response")
-	fmt.Println(result)
-
-	if err != nil {
-		fmt.Println("Error")
-	}
+	_, err := message.emailClient.SendEmail(emailParams)
+	return err
 }

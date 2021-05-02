@@ -26,7 +26,7 @@ func init() {
 func hello() (string, error) {
 	fmt.Println("Logging the handler")
 
-	g_notifier.Send()
+	g_notifier.Send(notifications.NotifierContent{Unit: "5G"})
 
 	return "Hello ƛ! whatsuppp", nil
 }

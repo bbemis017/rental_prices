@@ -7,17 +7,26 @@ import (
 )
 
 const (
-	ENV_NOTIFY_TYPE = "NOTIFY_TYPE"
+	ENV_AWS_REGION      = "AWS_REGION"
+	ENV_NOTIFY_TYPE     = "NOTIFY_TYPE"
+	ENV_EMAIL_RECIPIENT = "EMAIL_RECIPIENT"
+	ENV_EMAIL_SUBJECT   = "EMAIL_SUBJECT"
 )
 
 func GetEnvOrFail(key string) string {
-
 	value := os.Getenv(key)
 	if value == "" {
 		err := errors.New(key + " is undefined")
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	return value
+}
 
+func GetEnvOrDefault(key string, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
 	return value
 }

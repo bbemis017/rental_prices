@@ -7,8 +7,12 @@ import (
 )
 
 type (
+	NotifierContent struct {
+		Unit string
+	}
+
 	Notifier interface {
-		Send()
+		Send(content NotifierContent) error
 	}
 )
 
@@ -24,8 +28,12 @@ func New() (Notifier, error) {
 	case EMAIL_NOTIFY_TYPE:
 		return NewEmailMessage()
 	case LOG_NOTIFY_TYPE:
-		return NewLogMessage("testing message")
+		return NewLogMessage()
 	default:
 		return nil, errors.New(util.ENV_NOTIFY_TYPE + "must be defined")
 	}
+}
+
+func (content NotifierContent) toString() string {
+	return "Unit: " + content.Unit
 }
