@@ -1,70 +1,31 @@
 package notifications
 
 import (
-	"fmt"
-	"os"
+	"errors"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/bbemis017/ApartmentNotifier/util"
 )
 
 type (
 	Notifier interface {
 		Send()
 	}
-
-	EmailMessage struct {
-		emailClient *ses.SES
-		toEmail     string
-		subject     string
-	}
 )
 
-func (message EmailMessage) Send() {
-	fmt.Println("Test send mail")
-
-	emailParams := &ses.SendEmailInput{
-		Message: &ses.Message{
-			Body: &ses.Body{
-				Text: &ses.Content{
-					Data: aws.String("message text"),
-				},
-			},
-			Subject: &ses.Content{
-				Data: aws.String(message.subject),
-			},
-		},
-		Destination: &ses.Destination{
-			ToAddresses: []*string{aws.String(message.toEmail)},
-		},
-		Source: aws.String(message.toEmail),
-	}
-	fmt.Println(emailParams)
-
-	result, err := message.emailClient.SendEmail(emailParams)
-
-	fmt.Println("Response")
-	fmt.Println(result)
-
-	if err != nil {
-		fmt.Println("Error")
-	}
-}
+const (
+	EMAIL_NOTIFY_TYPE = "EMAIL"
+	LOG_NOTIFY_TYPE   = "LOG"
+)
 
 func New() (Notifier, error) {
-	fmt.Println("Init Notifier")
 
-	notifier := EmailMessage{
-		toEmail: os.Getenv("TO_EMAIL"),
-		subject: os.Getenv("SUBJECT"),
+	notify_type := util.GetEnvOrFail(util.ENV_NOTIFY_TYPE)
+	switch notify_type {
+	case EMAIL_NOTIFY_TYPE:
+		return NewEmailMessage()
+	case LOG_NOTIFY_TYPE:
+		return NewLogMessage("testing message")
+	default:
+		return nil, errors.New(util.ENV_NOTIFY_TYPE + "must be defined")
 	}
-
-	if len(notifier.subject) < 0 {
-		notifier.subject = "Message from website"
-	}
-
-	notifier.emailClient = ses.New(session.New(), aws.NewConfig().WithRegion("us-east-1"))
-
-	return notifier, nil
 }
