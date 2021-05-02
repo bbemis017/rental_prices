@@ -1,8 +1,6 @@
 package notifications
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -48,7 +46,6 @@ func (message EmailMessage) Send(content NotifierContent) error {
 		},
 		Source: aws.String(message.toEmail),
 	}
-	fmt.Println(emailParams)
 
 	_, err := message.emailClient.SendEmail(emailParams)
 	return err

@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/bbemis017/ApartmentNotifier/notifications"
+	"github.com/bbemis017/ApartmentNotifier/scrapeit"
 )
 
 var g_notifier notifications.Notifier
@@ -25,6 +26,9 @@ func init() {
 
 func hello() (string, error) {
 	fmt.Println("Logging the handler")
+
+	job := scrapeit.NewJob(15, true)
+	fmt.Println(job.Start())
 
 	g_notifier.Send(notifications.NotifierContent{Unit: "5G"})
 
