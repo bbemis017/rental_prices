@@ -30,6 +30,8 @@ func hello() (string, error) {
 	job := scrapeit.NewJob(15, true)
 	fmt.Println(job.Start())
 
+	fmt.Println(job.Status())
+
 	g_notifier.Send(notifications.NotifierContent{Unit: "5G"})
 
 	return "Hello ƛ! whatsuppp", nil
