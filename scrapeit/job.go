@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/bbemis017/ApartmentNotifier/util"
 )
@@ -18,6 +19,7 @@ type (
 		cacheOn    bool
 		taskId     string `json:"id"`
 		status     string
+		data       map[string]interface{}
 	}
 )
 
@@ -52,35 +54,61 @@ func (job *JobStruct) Start() (string, error) {
 }
 
 func (job *JobStruct) Status() (string, error) {
-	if job.status == "SUCCESS" || job.status == "ERROR" {
+	if job.status == "SUCCESS" || job.status == "ERROR" || job.status == "FAILURE" {
 		return job.status, nil
 	}
 
-	type Results struct {
-		State string `json:"state"`
-	}
-	var results Results
-
-	err := send_request(
+	bytes, err := sendRequestBytes(
 		"GET",
 		"job/"+job.taskId+"/status",
 		map[string]string{},
-		&results,
 	)
+
 	if err != nil {
 		return "", err
 	}
 
-	job.status = results.State
+	var v interface{}
+	json.Unmarshal(bytes, &v)
+	result_map := v.(map[string]interface{})
+
+	job.status = result_map["state"].(string)
+
+	if job.status == "SUCCESS" {
+		job.data = result_map["data"].(map[string]interface{})
+	}
 
 	return job.status, nil
 }
 
-func GetResult() (string, error) {
-	return "", nil
+func (job *JobStruct) AwaitResult() (map[string]interface{}, error) {
+	fmt.Println("Wait for Results")
+
+	status, _ := job.Status()
+	fmt.Println(status)
+
+	for status != "SUCCESS" && status != "ERROR" && status != "FAILURE" {
+		time.Sleep(3 * time.Second)
+
+		status, _ = job.Status()
+		fmt.Println(status)
+	}
+
+	if status == "SUCCESS" {
+		return job.data, nil
+	} else {
+		return nil, errors.New("error occurred Status: " + job.status)
+	}
 }
 
-func send_request(method string, url string, body map[string]string, result_struct interface{}) error {
+func (job *JobStruct) GetResult() (map[string]interface{}, error) {
+	if job.status == "SUCCESS" {
+		return job.data, nil
+	}
+	return nil, errors.New("No Result Available, Status " + job.status)
+}
+
+func sendRequestBytes(method string, url string, body map[string]string) ([]byte, error) {
 	// Encode Object into json bytes
 	encoded_body, _ := json.Marshal(body)
 
@@ -98,19 +126,27 @@ func send_request(method string, url string, body map[string]string, result_stru
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// if request does not return a 200 status code like 200 or 202
 	if !strings.HasPrefix(res.Status, "20") {
-		return errors.New("HTTP Request returned" + res.Status)
+		return nil, errors.New("HTTP Request returned" + res.Status)
 	}
 
 	defer res.Body.Close()
+	bytes, _ := ioutil.ReadAll(res.Body)
+	return bytes, nil
+}
+
+func send_request(method string, url string, body map[string]string, result_struct interface{}) error {
 
 	// Unmarshal results into result struct
-	bytes, _ := ioutil.ReadAll(res.Body)
-	json.Unmarshal(bytes, &result_struct)
+	bytes, err := sendRequestBytes(method, url, body)
+	if err != nil {
+		return err
+	}
 
+	json.Unmarshal(bytes, &result_struct)
 	return nil
 }
