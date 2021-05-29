@@ -7,7 +7,7 @@ import (
 )
 
 type CSVStore struct {
-	filepath string
+	Filepath string
 	Length   int
 }
 
@@ -25,14 +25,14 @@ func NewCSVStore(filepath string) CSVStore {
 	defer file.Close()
 
 	return CSVStore{
-		filepath: filepath,
+		Filepath: filepath,
 		Length:   length,
 	}
 }
 
 // Writes a record to the CSV file
 func (store *CSVStore) WriteRecords(records [][]string) error {
-	file, openError := os.OpenFile(store.filepath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	file, openError := os.OpenFile(store.Filepath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if openError != nil {
 		return openError
 	}
@@ -49,7 +49,7 @@ func (store *CSVStore) WriteRecords(records [][]string) error {
 
 // Writes a record to the CSV file
 func (store *CSVStore) WriteRecord(record []string) error {
-	file, openError := os.OpenFile(store.filepath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	file, openError := os.OpenFile(store.Filepath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if openError != nil {
 		return openError
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/bbemis017/ApartmentNotifier/datastore"
 	"github.com/bbemis017/ApartmentNotifier/notifications"
 	"github.com/bbemis017/ApartmentNotifier/scrapeit"
+	"github.com/bbemis017/ApartmentNotifier/util"
 )
 
 var g_notifier notifications.Notifier
@@ -25,7 +26,7 @@ func init() {
 	}
 
 	fmt.Println("Lambda Initialized")
-	process()
+	// process()
 }
 
 func hello() (string, error) {
@@ -41,20 +42,29 @@ func hello() (string, error) {
 func process() {
 	timestamp := time.Now().Format(time.RFC3339)
 
-	job := scrapeit.NewJob(20, true)
-	job.Start()
-	rawData, _ := job.AwaitResult()
-
-	csvStore := datastore.NewCSVStore("apartments.csv")
+	csvStore := datastore.NewCSVStore(util.GetEnvOrFail(util.ENV_APARTMENTS_CSV))
 	if csvStore.Length < 1 {
 		datastore.WriteHeader(&csvStore)
 	}
+
+	job := scrapeit.NewJob(20, true)
+	job.Start()
+	rawData, _ := job.AwaitResult()
 
 	log.Println("Write Apartment data")
 	for _, val := range rawData["Apartments"].([]interface{}) {
 		unit, _ := datastore.NewUnit(val.(map[string]interface{}), "Ravenswood Terrace", "1801 W Argyle St, Chicago, IL 60640", timestamp)
 
 		unit.Save(&csvStore)
+	}
+
+	s3Bucket := util.GetEnvOrDefault(util.ENV_AWS_S3_BUCKET, "NONE")
+	if s3Bucket != "NONE" {
+		log.Println("Uploading to S3")
+		util.UploadFile(csvStore.Filepath, s3Bucket)
+		log.Println("File Uploaded to S3")
+	} else {
+		log.Println("S3 Bucket not specified")
 	}
 
 	log.Println("Done")
