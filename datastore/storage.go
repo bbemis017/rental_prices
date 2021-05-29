@@ -1,65 +1,28 @@
 package datastore
 
 import (
-	"encoding/csv"
-	"log"
-	"os"
+	"strings"
 )
 
 type CSVStore struct {
-	Filepath string
-	Length   int
+	Data string // string in quoted csv format
 }
 
-func NewCSVStore(filepath string) CSVStore {
-	length := 0
-
-	file, openError := os.Open(filepath)
-	if openError == nil {
-		filedata, err := csv.NewReader(file).ReadAll()
-		if err != nil {
-			log.Fatal(err)
-		}
-		length = len(filedata)
-	}
-	defer file.Close()
-
+func NewCSVStore(header []string) CSVStore {
 	return CSVStore{
-		Filepath: filepath,
-		Length:   length,
+		Data: strings.Join(quoteStrings(header), ",") + "\n",
 	}
 }
 
-// Writes a record to the CSV file
-func (store *CSVStore) WriteRecords(records [][]string) error {
-	file, openError := os.OpenFile(store.Filepath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if openError != nil {
-		return openError
+// Quotes all values in string array in place
+func quoteStrings(record []string) []string {
+	for index := range record {
+		record[index] = "\"" + record[index] + "\""
 	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-	writer.WriteAll(records)
-
-	store.Length += len(records)
-
-	return nil
+	return record
 }
 
 // Writes a record to the CSV file
-func (store *CSVStore) WriteRecord(record []string) error {
-	file, openError := os.OpenFile(store.Filepath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if openError != nil {
-		return openError
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-	writer.Write(record)
-
-	store.Length++
-
-	return nil
+func (store *CSVStore) WriteRecord(record []string) {
+	store.Data += strings.Join(quoteStrings(record), ",") + "\n"
 }

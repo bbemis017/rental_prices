@@ -26,7 +26,6 @@ func init() {
 	}
 
 	fmt.Println("Lambda Initialized")
-	// process()
 }
 
 func hello() (string, error) {
@@ -40,12 +39,9 @@ func hello() (string, error) {
 }
 
 func process() {
-	timestamp := time.Now().Format(time.RFC3339)
+	timestamp := time.Now().UTC().Format(time.RFC3339)
 
-	csvStore := datastore.NewCSVStore(util.GetEnvOrFail(util.ENV_APARTMENTS_CSV))
-	if csvStore.Length < 1 {
-		datastore.WriteHeader(&csvStore)
-	}
+	csvStore := datastore.NewCSVStore([]string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"})
 
 	job := scrapeit.NewJob(20, true)
 	job.Start()
@@ -60,11 +56,11 @@ func process() {
 
 	s3Bucket := util.GetEnvOrDefault(util.ENV_AWS_S3_BUCKET, "NONE")
 	if s3Bucket != "NONE" {
-		log.Println("Uploading to S3")
-		util.UploadFile(csvStore.Filepath, s3Bucket)
-		log.Println("File Uploaded to S3")
+		util.SaveToS3(s3Bucket, "apartments", csvStore.Data)
 	} else {
 		log.Println("S3 Bucket not specified")
+		log.Println("Logging Data to stdout")
+		log.Println(csvStore.Data)
 	}
 
 	log.Println("Done")
