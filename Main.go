@@ -33,13 +33,14 @@ func hello() (string, error) {
 
 	process()
 
-	g_notifier.Send(notifications.NotifierContent{Unit: "5G"})
+	// disabling email notifications
+	// g_notifier.Send(notifications.NotifierContent{Unit: "5G"})
 
 	return "Hello ƛ! whatsuppp", nil
 }
 
 func process() {
-	timestamp := time.Now().UTC().Format(time.RFC3339)
+	timestamp := time.Now().Format(time.RFC3339)
 
 	csvStore := datastore.NewCSVStore([]string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"})
 
