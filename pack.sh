@@ -1,13 +1,20 @@
+#!/bin/bash
+
+# exit when any command fails
+set -e
 
 OUTPUT_DIR="bin"
 
-rm "${OUTPUT_DIR}/main"
-rm "${OUTPUT_DIR}/main.zip"
+# Remove Output Directory if it exists
+[[ -d "${OUTPUT_DIR}" ]] && rm -r "${OUTPUT_DIR}"
+
+# Recreate Output Directory
+mkdir "${OUTPUT_DIR}"
 
 GOOS=linux GOARCH=amd64 go build -o "${OUTPUT_DIR}/main" main.go
 
-cd "${OUTPUT_DIR}"
-
-zip main main
-
-cd ..
+# zip up deployment archive
+(
+  cd "${OUTPUT_DIR}" || exit
+  zip deployment main
+)
