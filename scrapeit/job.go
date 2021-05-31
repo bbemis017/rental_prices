@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,10 +51,14 @@ func NewJob(templateId int, cacheOn bool) JobStruct {
 func (job *JobStruct) Start() (string, error) {
 	fmt.Println("Start")
 
+	body := map[string]string{
+		"cache_on": strconv.FormatBool(job.cacheOn),
+	}
+
 	result_map, err := sendRequest(
 		"POST",
 		"job/"+fmt.Sprint(job.templateId),
-		map[string]string{},
+		body,
 	)
 	if err != nil {
 		return "", err

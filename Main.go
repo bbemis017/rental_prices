@@ -44,7 +44,7 @@ func process() {
 
 	csvStore := datastore.NewCSVStore([]string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"})
 
-	job := scrapeit.NewJob(20, true)
+	job := scrapeit.NewJob(20, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
 	job.Start()
 	rawData, _ := job.AwaitResult()
 

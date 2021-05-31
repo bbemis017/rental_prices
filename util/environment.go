@@ -3,7 +3,9 @@ package util
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 )
 
 const (
@@ -14,8 +16,9 @@ const (
 	ENV_EMAIL_SUBJECT   = "EMAIL_SUBJECT"
 	ENV_APARTMENTS_CSV  = "APARTMENTS_CSV"
 
-	ENV_SCRAPEIT_NET_HOST = "SCRAPEIT_NET_HOST"
-	ENV_SCRAPEIT_NET_KEY  = "SCRAPEIT_NET_KEY"
+	ENV_SCRAPEIT_NET_HOST  = "SCRAPEIT_NET_HOST"
+	ENV_SCRAPEIT_NET_KEY   = "SCRAPEIT_NET_KEY"
+	ENV_SCRAPEIT_NET_CACHE = "SCRAPEIT_NET_CACHE"
 )
 
 func GetEnvOrFail(key string) string {
@@ -24,6 +27,15 @@ func GetEnvOrFail(key string) string {
 		err := errors.New(key + " is undefined")
 		fmt.Println(err)
 		os.Exit(1)
+	}
+	return value
+}
+
+func GetEnvBoolOrFail(key string) bool {
+	strValue := GetEnvOrFail(key)
+	value, err := strconv.ParseBool(strValue)
+	if err != nil {
+		log.Fatalf("%s is not a boolean", key)
 	}
 	return value
 }
