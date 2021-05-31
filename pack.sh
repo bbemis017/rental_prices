@@ -18,3 +18,7 @@ GOOS=linux GOARCH=amd64 go build -o "${OUTPUT_DIR}/main" main.go
   cd "${OUTPUT_DIR}" || exit
   zip deployment main
 )
+
+echo "----- PROJECT BUILT -----"
+echo "----- BIN CONTENTS  -----"
+ls bin
