@@ -30,15 +30,15 @@ jobs:
         with:
             go-version: 1.15
 
-       - name: Debug
-         run: |
-          pwd
-          echo ${HOME}
-          echo ${GITHUB_WORKSPACE}
-          echo ${GOPATH}
-          echo ${GOROOT}
-         env:
-          GOPATH: /home/runner/work/rental_prices/rental_prices
+      - name: Debug
+        run: |
+         pwd
+         echo ${HOME}
+         echo ${GITHUB_WORKSPACE}
+         echo ${GOPATH}
+         echo ${GOROOT}
+        env:
+         GOPATH: /home/runner/work/rental_prices/rental_prices
   
       - name: Build binary
         run: |
