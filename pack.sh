@@ -11,14 +11,21 @@ OUTPUT_DIR="bin"
 # Recreate Output Directory
 mkdir "${OUTPUT_DIR}"
 
+echo "===== CURRENT DIR ====="
+ls -la
+
+echo "===== BUILDING GOLANG ====="
+
 GOOS=linux GOARCH=amd64 go build -o "${OUTPUT_DIR}/main" main.go
 
 # zip up deployment archive
 (
+  echo "===== ZIPPING BINARIES ====="
   cd "${OUTPUT_DIR}" || exit
   zip deployment main
 )
 
-echo "----- PROJECT BUILT -----"
-echo "----- BIN CONTENTS  -----"
-ls bin
+echo "===== BIN CONTENTS  ====="
+ls -l bin
+echo "===== ZIP CONTENTS  ====="
+unzip -l bin/deployment.zip

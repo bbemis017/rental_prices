@@ -37,14 +37,15 @@ jobs:
          echo ${GITHUB_WORKSPACE}
          echo ${GOPATH}
          echo ${GOROOT}
-        env:
-         GOPATH: /home/runner/work/rental_prices/rental_prices
+         echo ${GOPROXY}
+        # env:
+        #  GOPATH: /home/runner/work/rental_prices/rental_prices
   
       - name: Build binary
         run: |
           bash ./pack.sh
-        env:
-          GOPATH: /home/runner/work/rental_prices/rental_prices
+        # env:
+        #   GOPATH: /home/runner/work/rental_prices/rental_prices
       
       - name: AWS Lambda Deploy
         uses: appleboy/lambda-action@v0.1.3
