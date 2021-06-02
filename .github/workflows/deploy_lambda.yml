@@ -5,8 +5,6 @@ name: Deploy to AWS Lambda
 # Controls when the action will run. 
 on:
   # Triggers the workflow on published releases
-  pull_request:
-    branches: [ main ] # TODO only for testing
   release:
     branches: [ main ]
     types:
