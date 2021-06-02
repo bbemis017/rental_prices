@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 on:
   push:
@@ -18,8 +18,17 @@ jobs:
       with:
         go-version: 1.15
 
-    - name: Build
-      run: go build -v ./...
+    - name: Debug ENV Variables
+        run: |
+         pwd
+         echo ${HOME}
+         echo ${GITHUB_WORKSPACE}
+         echo ${GOPATH}
+         echo ${GOROOT}
+         echo ${GOPROXY}
+
+    - name: Build Binary
+      run: bash ./pack.sh
 
     - name: Test
       run: go test -v ./...
