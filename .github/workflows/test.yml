@@ -32,3 +32,5 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+      env:
+        NOTIFY_TYPE=LOG
