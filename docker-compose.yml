@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+
+  # dremio is useful for querying data across csv files in an s3 bucket
+  dremio:
+    image: dremio/dremio-oss
+    volumes:
+      - ./tmp/dremio:/opt/dremio/data dremio/dremio-oss
+    ports:
+      - "9047:9047"  # web client
