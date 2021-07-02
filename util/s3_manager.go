@@ -13,7 +13,7 @@ import (
 func SaveToS3(bucket string, filegroup string, data string) {
 
 	// Create a filename with the file group and timestamp
-	timestamp := time.Now().Format(time.RFC3339)
+	timestamp := FormatTimeStamp(time.Now())
 	filename := filegroup + "_" + timestamp + ".csv"
 
 	// create a reader from data in memory

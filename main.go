@@ -40,7 +40,7 @@ func hello() (string, error) {
 }
 
 func process() {
-	timestamp := time.Now().Format(time.RFC3339)
+	timestamp := util.FormatTimeStamp(time.Now())
 
 	csvStore := datastore.NewCSVStore([]string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"})
 
