@@ -68,6 +68,11 @@ func process() {
 }
 
 func main() {
-	// Make the handler available for Remote Procedure Call by AWS Lambda
-	lambda.Start(hello)
+
+	if util.GetEnvBoolOrDefault(util.ENV_LAMBDA_MODE, true) {
+		// Make the handler available for Remote Procedure Call by AWS Lambda
+		lambda.Start(hello)
+	} else {
+		hello()
+	}
 }
