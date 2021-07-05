@@ -4,21 +4,16 @@
 ## Local Development
 
 ### Configuration
-example.env provides an example of the environment variables required to
+example.envrc provides an example of the environment variables required to
 run this application. Some variables such as SCRAPEIT_NET_KEY are secrets
 and you may need to generate your own.
 
-To setup your environment more easily you can add this snippet to your .bashrc file
+To setup your environment more easily you can use [direnv](https://direnv.net/). With direnv installed you should be able to
+copy example.envrc to .envrc, input your own values for your environment, and tell direnv to export your variables:
 
 ```bash
-export_env() {
-   temp_file="export_env.temp"
-   cat "${1}" | grep -v "^$" | grep -v "^#" > ${temp_file}
-   while IFS= read -r line; do
-          export "${line}"
-   done < ${temp_file}
-   rm ${temp_file}
-}
+cp example.envrc .envrc
+direnv allow
 ```
 With this in your bashrc you can export
 the environment variables by calling
