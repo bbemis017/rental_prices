@@ -42,26 +42,32 @@ func hello() (string, error) {
 func process() {
 	timestamp := util.FormatTimeStamp(time.Now())
 
-	csvStore := datastore.NewCSVStore([]string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"})
-
-	job := scrapeit.NewJob(20, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
+	job := scrapeit.NewJob(28, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
 	job.Start()
 	rawData, _ := job.AwaitResult()
 
 	log.Println("Write Apartment data")
-	for _, val := range rawData["Apartments"].([]interface{}) {
-		unit, _ := datastore.NewUnit(val.(map[string]interface{}), "Ravenswood Terrace", "1801 W Argyle St, Chicago, IL 60640", timestamp)
+	data := ""
+	header := []string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"}
+	for _, val := range rawData["apartments"].([]interface{}) {
+		dataMap := val.(map[string]interface{})
 
-		unit.Save(&csvStore)
+		// static field values
+		dataMap["created_at"] = timestamp
+		dataMap["address"] = "1801 W Argyle St, Chicago, IL 60640"
+
+		datastore.CleanDataMap(dataMap)
+
+		data += datastore.MapJsonToCsvString(header, dataMap)
 	}
 
 	s3Bucket := util.GetEnvOrDefault(util.ENV_AWS_S3_BUCKET, "NONE")
 	if s3Bucket != "NONE" {
-		util.SaveToS3(s3Bucket, "apartments", csvStore.Data)
+		util.SaveToS3(s3Bucket, "apartments", data)
 	} else {
 		log.Println("S3 Bucket not specified")
 		log.Println("Logging Data to stdout")
-		log.Println(csvStore.Data)
+		log.Println(data)
 	}
 
 	log.Println("Done")
