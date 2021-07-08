@@ -39,27 +39,50 @@ func hello() (string, error) {
 	return "Hello ƛ! whatsuppp", nil
 }
 
-func process() {
+/* Calls a WebScraping Template, cleans data and appends metaData values to every record
+ * @param templateId
+ * @param metaData
+ * @returns cleaned data in quoted csv format as a string
+ * @returns TODO error if template could not be processed
+ */
+func process_complex(templateId int, metaData map[string]string) (string, error) {
 	timestamp := util.FormatTimeStamp(time.Now())
 
 	job := scrapeit.NewJob(28, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
 	job.Start()
 	rawData, _ := job.AwaitResult()
 
-	log.Println("Write Apartment data")
-	data := ""
+	csvStr := ""
+
 	header := []string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"}
 	for _, val := range rawData["apartments"].([]interface{}) {
 		dataMap := val.(map[string]interface{})
 
 		// static field values
 		dataMap["created_at"] = timestamp
-		dataMap["address"] = "1801 W Argyle St, Chicago, IL 60640"
+
+		addMetaData(dataMap, metaData)
 
 		datastore.CleanDataMap(dataMap)
 
-		data += datastore.MapJsonToCsvString(header, dataMap)
+		csvStr += datastore.MapJsonToCsvString(header, dataMap)
 	}
+
+	return csvStr, nil
+}
+
+func addMetaData(record map[string]interface{}, metaData map[string]string) {
+	for k, v := range metaData {
+		record[k] = v
+	}
+}
+
+func process() {
+	log.Println("Process")
+
+	ravenswoodTerrace, _ := process_complex(28, map[string]string{"address": "1801 W Argyle St, Chicago, IL 60640"})
+
+	data := ravenswoodTerrace
 
 	s3Bucket := util.GetEnvOrDefault(util.ENV_AWS_S3_BUCKET, "NONE")
 	if s3Bucket != "NONE" {
