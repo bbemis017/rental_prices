@@ -54,7 +54,18 @@ func process_complex(templateId int, metaData map[string]string) (string, error)
 
 	csvStr := ""
 
-	header := []string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"}
+	header := []string{
+		"created_at",
+		"complex",
+		"unit_number",
+		"price",
+		"availability",
+		"bedrooms",
+		"baths",
+		"address",
+		"floor_plan",
+		"square_feet",
+	}
 	for _, val := range rawData["apartments"].([]interface{}) {
 		dataMap := val.(map[string]interface{})
 
