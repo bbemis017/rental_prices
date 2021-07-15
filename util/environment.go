@@ -19,6 +19,8 @@ const (
 	ENV_SCRAPEIT_NET_HOST  = "SCRAPEIT_NET_HOST"
 	ENV_SCRAPEIT_NET_KEY   = "SCRAPEIT_NET_KEY"
 	ENV_SCRAPEIT_NET_CACHE = "SCRAPEIT_NET_CACHE"
+
+	ENV_LAMBDA_MODE = "LAMBDA_MODE"
 )
 
 func GetEnvOrFail(key string) string {
@@ -38,6 +40,15 @@ func GetEnvBoolOrFail(key string) bool {
 		log.Fatalf("%s is not a boolean", key)
 	}
 	return value
+}
+
+func GetEnvBoolOrDefault(key string, defaultValue bool) bool {
+	strVal := GetEnvOrDefault(key, strconv.FormatBool(defaultValue))
+	val, err := strconv.ParseBool(strVal)
+	if err != nil {
+		log.Fatalf("%s is not a bollean", key)
+	}
+	return val
 }
 
 func GetEnvOrDefault(key string, defaultValue string) string {

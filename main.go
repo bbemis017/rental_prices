@@ -39,35 +39,85 @@ func hello() (string, error) {
 	return "Hello ƛ! whatsuppp", nil
 }
 
-func process() {
+/* Calls a WebScraping Template, cleans data and appends metaData values to every record
+ * @param templateId
+ * @param metaData
+ * @returns cleaned data in quoted csv format as a string
+ * @returns TODO error if template could not be processed
+ */
+func process_complex(templateId int, metaData map[string]string) (string, error) {
 	timestamp := util.FormatTimeStamp(time.Now())
 
-	csvStore := datastore.NewCSVStore([]string{"created_at", "complex", "unit_number", "price", "availability", "bedrooms", "baths", "address"})
-
-	job := scrapeit.NewJob(20, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
-	job.Start()
+	job := scrapeit.NewJob(templateId, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
+	_, err := job.Start()
+	if err != nil {
+		log.Fatalln("Unable to start job, " + err.Error())
+	}
 	rawData, _ := job.AwaitResult()
 
-	log.Println("Write Apartment data")
-	for _, val := range rawData["Apartments"].([]interface{}) {
-		unit, _ := datastore.NewUnit(val.(map[string]interface{}), "Ravenswood Terrace", "1801 W Argyle St, Chicago, IL 60640", timestamp)
+	csvStr := ""
 
-		unit.Save(&csvStore)
+	header := []string{
+		"created_at",
+		"complex",
+		"unit_number",
+		"price",
+		"availability",
+		"bedrooms",
+		"baths",
+		"address",
+		"floor_plan",
+		"square_feet",
 	}
+	for _, val := range rawData["apartments"].([]interface{}) {
+		dataMap := val.(map[string]interface{})
+
+		// static field values
+		dataMap["created_at"] = timestamp
+
+		addMetaData(dataMap, metaData)
+
+		datastore.CleanDataMap(dataMap)
+
+		csvStr += datastore.MapJsonToCsvString(header, dataMap)
+	}
+
+	return csvStr, nil
+}
+
+func addMetaData(record map[string]interface{}, metaData map[string]string) {
+	for k, v := range metaData {
+		record[k] = v
+	}
+}
+
+func process() {
+	log.Println("Process")
+
+	ravenswoodTerrace, _ := process_complex(28, map[string]string{"address": "1801 W Argyle St, Chicago, IL 60640"})
+	cirrus, _ := process_complex(29, map[string]string{"address": "2030 8th Avenue  Seattle,  WA  98121", "complex": "Cirrus"})
+
+	data := ravenswoodTerrace
+	data += cirrus
 
 	s3Bucket := util.GetEnvOrDefault(util.ENV_AWS_S3_BUCKET, "NONE")
 	if s3Bucket != "NONE" {
-		util.SaveToS3(s3Bucket, "apartments", csvStore.Data)
+		util.SaveToS3(s3Bucket, "apartments", data)
 	} else {
 		log.Println("S3 Bucket not specified")
 		log.Println("Logging Data to stdout")
-		log.Println(csvStore.Data)
+		log.Println(data)
 	}
 
 	log.Println("Done")
 }
 
 func main() {
-	// Make the handler available for Remote Procedure Call by AWS Lambda
-	lambda.Start(hello)
+
+	if util.GetEnvBoolOrDefault(util.ENV_LAMBDA_MODE, true) {
+		// Make the handler available for Remote Procedure Call by AWS Lambda
+		lambda.Start(hello)
+	} else {
+		hello()
+	}
 }

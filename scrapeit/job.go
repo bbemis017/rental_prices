@@ -98,17 +98,24 @@ func (job *JobStruct) Status() (string, error) {
 func (job *JobStruct) AwaitResult() (map[string]interface{}, error) {
 	fmt.Println("Wait for Results")
 
-	status, _ := job.Status()
-	fmt.Println(status)
-
-	for !isFinalState(status) {
-		time.Sleep(3 * time.Second)
-
-		status, _ = job.Status()
-		fmt.Println(status)
+	status, err := job.Status()
+	job.status = status
+	if err != nil {
+		return nil, err
 	}
 
-	if status == STATUS_SUCCESS {
+	for !isFinalState(job.status) {
+		time.Sleep(3 * time.Second)
+
+		status, err2 := job.Status()
+		job.status = status
+		if err != nil {
+			return nil, err2
+		}
+		fmt.Println(job.status)
+	}
+
+	if job.status == STATUS_SUCCESS {
 		return job.data, nil
 	} else {
 		return nil, errors.New("error occurred Status: " + job.status)
