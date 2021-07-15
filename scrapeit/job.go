@@ -99,21 +99,23 @@ func (job *JobStruct) AwaitResult() (map[string]interface{}, error) {
 	fmt.Println("Wait for Results")
 
 	status, err := job.Status()
+	job.status = status
 	if err != nil {
 		return nil, err
 	}
 
-	for !isFinalState(status) {
+	for !isFinalState(job.status) {
 		time.Sleep(3 * time.Second)
 
 		status, err2 := job.Status()
+		job.status = status
 		if err != nil {
 			return nil, err2
 		}
-		fmt.Println(status)
+		fmt.Println(job.status)
 	}
 
-	if status == STATUS_SUCCESS {
+	if job.status == STATUS_SUCCESS {
 		return job.data, nil
 	} else {
 		return nil, errors.New("error occurred Status: " + job.status)
