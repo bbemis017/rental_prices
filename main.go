@@ -51,7 +51,7 @@ func process_complex(templateId int, metaData map[string]string) (string, error)
 	job := scrapeit.NewJob(templateId, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
 	_, err := job.Start()
 	if err != nil {
-		log.Fatalf("Unable to start job, %s%n", err)
+		log.Fatalln("Unable to start job, " + err.Error())
 	}
 	rawData, _ := job.AwaitResult()
 
