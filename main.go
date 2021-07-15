@@ -48,7 +48,7 @@ func hello() (string, error) {
 func process_complex(templateId int, metaData map[string]string) (string, error) {
 	timestamp := util.FormatTimeStamp(time.Now())
 
-	job := scrapeit.NewJob(28, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
+	job := scrapeit.NewJob(templateId, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
 	_, err := job.Start()
 	if err != nil {
 		log.Fatalf("Unable to start job, %s%n", err)
@@ -95,8 +95,10 @@ func process() {
 	log.Println("Process")
 
 	ravenswoodTerrace, _ := process_complex(28, map[string]string{"address": "1801 W Argyle St, Chicago, IL 60640"})
+	cirrus, _ := process_complex(29, map[string]string{"address": "2030 8th Avenue  Seattle,  WA  98121", "complex": "Cirrus"})
 
 	data := ravenswoodTerrace
+	data += cirrus
 
 	s3Bucket := util.GetEnvOrDefault(util.ENV_AWS_S3_BUCKET, "NONE")
 	if s3Bucket != "NONE" {
