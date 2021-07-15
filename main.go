@@ -49,7 +49,10 @@ func process_complex(templateId int, metaData map[string]string) (string, error)
 	timestamp := util.FormatTimeStamp(time.Now())
 
 	job := scrapeit.NewJob(28, util.GetEnvBoolOrFail(util.ENV_SCRAPEIT_NET_CACHE))
-	job.Start()
+	_, err := job.Start()
+	if err != nil {
+		log.Fatalf("Unable to start job, %s%n", err)
+	}
 	rawData, _ := job.AwaitResult()
 
 	csvStr := ""
