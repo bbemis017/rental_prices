@@ -39,3 +39,9 @@ func TestEscapeVal(t *testing.T) {
 	value := "one"
 	assert.Equal(t, "\"one\"", escapeVal(value))
 }
+
+// Tests that the Header array can be mapped to csv correctly
+func TestHeader(t *testing.T) {
+	header := []string{"one", "two", "three"}
+	assert.Equal(t, "\"one\",\"two\",\"three\"\n", HeaderToCsv(header))
+}

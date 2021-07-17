@@ -24,6 +24,17 @@ func MapJsonToCsvString(header []string, json map[string]interface{}) string {
 	return csvRecord + "\n"
 }
 
+func HeaderToCsv(header []string) string {
+	record := ""
+	for index, col := range header {
+		record += escapeVal(col)
+		if index < len(header)-1 {
+			record += ","
+		}
+	}
+	return record + "\n"
+}
+
 // escapeVal wraps string value in double quotes
 // Example:
 // abc -> "abc"

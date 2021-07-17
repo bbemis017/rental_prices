@@ -55,8 +55,6 @@ func process_complex(templateId int, metaData map[string]string) (string, error)
 	}
 	rawData, _ := job.AwaitResult()
 
-	csvStr := ""
-
 	header := []string{
 		"created_at",
 		"complex",
@@ -69,6 +67,7 @@ func process_complex(templateId int, metaData map[string]string) (string, error)
 		"floor_plan",
 		"square_feet",
 	}
+	csvStr := datastore.HeaderToCsv(header)
 	for _, val := range rawData["apartments"].([]interface{}) {
 		dataMap := val.(map[string]interface{})
 
